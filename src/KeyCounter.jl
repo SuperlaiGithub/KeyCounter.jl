@@ -47,14 +47,15 @@ function Base.read(io::IO, ::Type{InputEvent})
     )
 end
 
-makekey(k) = k isa Integer ? UInt16(k) : Set(UInt16.(k))
+makekey(k) = k isa Integer ? Int(k) : Set{Int}(k)
+const Key = Union{Int, Set{Int}}
 
-struct Summary <: AbstractDict{Any, Int}
-    keys::Dict{Any, Int}
+struct Summary <: AbstractDict{Key, Int}
+    keys::Dict{Key, Int}
 end
-Summary() = Summary(Dict{Any, Int}())
-Summary(itr::Union{AbstractVector, Tuple}) = Summary(Dict{Any, Int}(
-    [makekey(k) => c for (k, c) ∈ itr]
+Summary() = Summary(Dict{Key, Int}())
+Summary(itr::Union{AbstractVector, Tuple}) = Summary(Dict{Key, Int}(
+    [makekey(k) => Int(c) for (k, c) ∈ itr]
 ))
 Summary(vals::Pair...) = Summary(vals)
 Base.iterate(s::Summary) = iterate(s.keys)
@@ -64,13 +65,14 @@ Base.getindex(s::Summary, key) = get(s, key, 0)
 Base.setindex!(s::Summary, value, key) = setindex!(s.keys, value, key)
 Base.haskey(s::Summary, key) = haskey(s.keys, key)
 Base.get(s::Summary, key, default) = get(s.keys, key, default)
-function add!(s::Summary, key)
+function add!(s::Summary, key::Key)
     if haskey(s, key)
         s[key] += 1
     else
         s[key] = 1
     end
 end
+add!(s::Summary, key) = add!(s, makekey(key))
 
 width(itr, default) = max(default, maximum(length, itr; init=default))
 
@@ -87,7 +89,7 @@ function Base.show(io::IO, ::MIME"text/plain", s::Summary)
 
     println(io, lpad("Keycode", keywidth), " | ", lpad("Count", countwidth))
     println(io, "-"^keywidth, "-+--", "-"^countwidth)
-    print(io, join(lines, "\n"))
+    println.(io, lines)
 end
 
 keystring(key) = string(key isa Integer ? key : key |> collect |> sort)
@@ -99,6 +101,17 @@ function Base.show(io::IO, s::Summary)
     end
     print(io, join(items, ", "), ")\n")
 end
+
+function save(io::IO, s::Summary)
+    for (keycode, count) ∈ sort(collect(s), by=last, rev=true)
+        keycodes = keycode isa Integer ? [keycode] : collect(keycode)
+        sort!(keycodes)
+        println(io, keycodes, ": ", count)
+    end
+    println(io, "")
+end
+save(s::Summary) = io -> save(io, s)
+save(filename::AbstractString, s::Summary) = open(save(s), filename; append=true)
 
 abstract type ActionType end
 struct KeyPress <: ActionType end
@@ -150,10 +163,8 @@ function logkeys(comm)
             if !isempty(comm)
                 command = take!(comm)
                 command == 'q' && (quit = true)
-                command == 's' && open(SAVE_FILE, "a") do file
-                    println(file, keys)
-                end
-                command == 'p' && println(keys)
+                command == 's' && save(SAVE_FILE, keys)
+                command == 'p' && show(stdout, MIME("text/plain"), keys)
             end
         end
     end
@@ -200,4 +211,4 @@ function run()
 end
 
 end;
-#KeyCounter.run()
+KeyCounter.run()
