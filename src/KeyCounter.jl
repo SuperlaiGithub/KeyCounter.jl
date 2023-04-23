@@ -1,5 +1,5 @@
 module KeyCounter
-
+const DEBUG = true
 const SAVE_FILE = "summary.log"
 
 const MODIFIERS = Set{UInt16}([
@@ -155,17 +155,19 @@ const action = Dict{UInt16, ActionType}(
 function logkeys(comm)
     keys = Summary()
     modifiers = Set{UInt16}()
-    num_keys = 0
     open("/dev/input/event6", "r") do kbd
         while true
-            mod(num_keys, 10) == 0 && @info "Waiting for keyboard event…"
             while eof(kbd)
                 sleep(0.1)
             end
             event = read(kbd, InputEvent)
-            mod(num_keys, 10) == 0 && @info "  Event found, processing…"
             if event.type == 1 && haskey(action, event.value)
-                num_keys += 1
+                if DEBUG
+                    println("Event")
+                    println("  Type:  $(event.type)")
+                    println("  Code:  $(event.code)")
+                    println("  Value: $(event.value)")
+                end
                 actiontype = action[event.value]
                 if event.code ∈ MODIFIERS
                     handle!(keys, modifiers, event.code, modifierkey, actiontype)
@@ -174,10 +176,7 @@ function logkeys(comm)
                     handle!(keys, modifiers, event.code, standardkey, actiontype)
                 end
             end
-            mod(num_keys, 10) == 0 && @info "  …done!"
-            mod(num_keys, 10) == 0 && @info "Channel has $(length(comm.data)) items waiting."
             while isready(comm)
-                mod(num_keys, 1) == 0 && @info "  Responding to item."
                 command = fetch(comm)
                 command == 's' && save(SAVE_FILE, keys)
                 command == 'p' && show(stdout, MIME("text/plain"), keys)
