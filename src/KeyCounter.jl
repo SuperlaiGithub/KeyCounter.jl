@@ -75,20 +75,31 @@ end
 add!(s::Summary, key) = add!(s, makekey(key))
 
 width(itr, default) = max(default, maximum(length, itr; init=default))
+function makewidth(str, width)
+    length(str) ≤ width && return lpad(str, width)
+    comma = findlast(',', str[1:width])
+    (comma ≡ nothing || comma ≥ width-1) && return str[1:width-1] * "…"
+    return lpad(str[1:comma] * " …", width)
+end
 
 function Base.show(io::IO, ::MIME"text/plain", s::Summary)
+    rows, cols = get(io, :displaysize, (25, 80))
+
     keys, counts = String[], String[]
     for (keycode, count) ∈ sort(collect(s), by=last, rev=true)
         keycodes = keycode isa Integer ? [keycode] : collect(keycode)
         sort!(keycodes)
         push!(keys, join(keycodes, ", "))
         push!(counts, string(count))
+        length(keys) + 2 == rows && break
     end
     keywidth, countwidth = width.([keys, counts], [8, 5])
-    lines = lpad.(keys, keywidth) .* " | " .* lpad.(counts, countwidth)
+    lines = makewidth.(keys, keywidth) .* " │ " .* lpad.(counts, countwidth)
 
-    println(io, lpad("Keycode", keywidth), " | ", lpad("Count", countwidth))
-    println(io, "-"^keywidth, "-+--", "-"^countwidth)
+    println(io, lpad("Keycode", keywidth), " │ ", lpad("Count", countwidth))
+    println(io, "╶", "─"^keywidth, "┼─", "─"^countwidth, "╴")
+
+    #if length(s) + 2 ≤ rows
     println.(io, lines)
 end
 
@@ -106,7 +117,7 @@ function save(io::IO, s::Summary)
     for (keycode, count) ∈ sort(collect(s), by=last, rev=true)
         keycodes = keycode isa Integer ? [keycode] : collect(keycode)
         sort!(keycodes)
-        println(io, keycodes, ": ", count)
+        println(io, repr(keycodes)[2:end-1], ": ", count)
     end
     println(io, "")
 end
@@ -144,14 +155,17 @@ const action = Dict{UInt16, ActionType}(
 function logkeys(comm)
     keys = Summary()
     modifiers = Set{UInt16}()
+    num_keys = 0
     open("/dev/input/event6", "r") do kbd
-        quit = false
-        while !quit
+        while true
+            mod(num_keys, 10) == 0 && @info "Waiting for keyboard event…"
             while eof(kbd)
                 sleep(0.1)
             end
             event = read(kbd, InputEvent)
+            mod(num_keys, 10) == 0 && @info "  Event found, processing…"
             if event.type == 1 && haskey(action, event.value)
+                num_keys += 1
                 actiontype = action[event.value]
                 if event.code ∈ MODIFIERS
                     handle!(keys, modifiers, event.code, modifierkey, actiontype)
@@ -160,11 +174,15 @@ function logkeys(comm)
                     handle!(keys, modifiers, event.code, standardkey, actiontype)
                 end
             end
-            if !isempty(comm)
-                command = take!(comm)
-                command == 'q' && (quit = true)
+            mod(num_keys, 10) == 0 && @info "  …done!"
+            mod(num_keys, 10) == 0 && @info "Channel has $(length(comm.data)) items waiting."
+            while isready(comm)
+                mod(num_keys, 1) == 0 && @info "  Responding to item."
+                command = fetch(comm)
                 command == 's' && save(SAVE_FILE, keys)
                 command == 'p' && show(stdout, MIME("text/plain"), keys)
+                take!(comm)
+                command == 'q' && return
             end
         end
     end
@@ -206,9 +224,11 @@ function run()
     while input ≠ 'q'
         input = prompt()
         put!(comm, input)
-        sleep(1)
+        while !isempty(comm)
+            sleep(0.1)
+        end
     end
 end
 
 end;
-KeyCounter.run()
+isinteractive() || KeyCounter.run()
