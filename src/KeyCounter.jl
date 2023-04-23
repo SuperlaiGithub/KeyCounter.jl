@@ -1,4 +1,4 @@
-module Keylogger
+module KeyCounter
 
 const SAVE_FILE = "summary.log"
 
@@ -18,8 +18,6 @@ const MODIFIERS = Set{UInt16}([
 const STANDARD = Set{UInt16}([
     125, 126
 ])
-
-const Key = Union{UInt16, Set{UInt16}}
 
 struct TimeVal
     seconds::UInt64
@@ -49,10 +47,16 @@ function Base.read(io::IO, ::Type{InputEvent})
     )
 end
 
-struct Summary <: AbstractDict{Key, Int}
-    keys::Dict{Key, Int}
+makekey(k) = k isa Integer ? UInt16(k) : Set(UInt16.(k))
+
+struct Summary <: AbstractDict{Any, Int}
+    keys::Dict{Any, Int}
 end
-Summary() = Summary(Dict{Key, Int}())
+Summary() = Summary(Dict{Any, Int}())
+Summary(itr::Union{AbstractVector, Tuple}) = Summary(Dict{Any, Int}(
+    [makekey(k) => c for (k, c) ∈ itr]
+))
+Summary(vals::Pair...) = Summary(vals)
 Base.iterate(s::Summary) = iterate(s.keys)
 Base.iterate(s::Summary, state) = iterate(s.keys, state)
 Base.length(s::Summary) = length(s.keys)
@@ -70,7 +74,7 @@ end
 
 width(itr, default) = max(default, maximum(length, itr; init=default))
 
-function Base.show(io::IO, s::Summary)
+function Base.show(io::IO, ::MIME"text/plain", s::Summary)
     keys, counts = String[], String[]
     for (keycode, count) ∈ sort(collect(s), by=last, rev=true)
         keycodes = keycode isa Integer ? [keycode] : collect(keycode)
@@ -82,11 +86,19 @@ function Base.show(io::IO, s::Summary)
     lines = lpad.(keys, keywidth) .* " | " .* lpad.(counts, countwidth)
 
     println(io, lpad("Keycode", keywidth), " | ", lpad("Count", countwidth))
-    println(io, "-"^keywidth, "-+-", "-"^countwidth)
-    println.(io, lines)
-    return nothing
+    println(io, "-"^keywidth, "-+--", "-"^countwidth)
+    print(io, join(lines, "\n"))
 end
-Base.show(io::IO, ::MIME"text/plain", s::Summary) = show(io, s)
+
+keystring(key) = string(key isa Integer ? key : key |> collect |> sort)
+function Base.show(io::IO, s::Summary)
+    print(io, "Summary(")
+    items = String[]
+    for (key, count) ∈ sort(collect(s), by=last, rev=true)
+        push!(items, keystring(key) * " => " * string(count))
+    end
+    print(io, join(items, ", "), ")\n")
+end
 
 abstract type ActionType end
 struct KeyPress <: ActionType end
@@ -122,6 +134,9 @@ function logkeys(comm)
     open("/dev/input/event6", "r") do kbd
         quit = false
         while !quit
+            while eof(kbd)
+                sleep(0.1)
+            end
             event = read(kbd, InputEvent)
             if event.type == 1 && haskey(action, event.value)
                 actiontype = action[event.value]
@@ -185,4 +200,4 @@ function run()
 end
 
 end;
-Keylogger.run()
+#KeyCounter.run()
