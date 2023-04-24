@@ -111,7 +111,7 @@ function Base.show(io::IO, ::MIME"text/plain", s::Summary)
     println(io, "╶", "─"^keywidth, "┼─", "─"^countwidth, "╴")
 
     #if length(s) + 2 ≤ rows
-    # need to adapt this to conform to space available
+    #
     println.(io, lines)
 end
 
