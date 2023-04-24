@@ -111,6 +111,7 @@ function Base.show(io::IO, ::MIME"text/plain", s::Summary)
     println(io, "╶", "─"^keywidth, "┼─", "─"^countwidth, "╴")
 
     #if length(s) + 2 ≤ rows
+    # need to adapt this to conform to space available
     println.(io, lines)
 end
 
@@ -130,7 +131,13 @@ function load(io::IO, ::Type{Summary})
         keys_str, count_str = split(line, ": ")
         keycodes_str = split(keys_str, ", ")
         keycodes, count = parse.(Int, keycodes_str), parse(Int, count_str)
-        s[makekey(keycodes)] = count
+        length(keycodes) == 1 && (keycodes = only(keycodes))
+        key = makekey(keycodes)
+        if haskey(s, key)
+            s[key] += count
+        else
+            s[key] = count
+        end
     end
     return s
 end

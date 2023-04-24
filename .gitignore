@@ -28,4 +28,4 @@ Manifest.toml
 .vscode
 
 # Log files
-summary.log
+*.log
