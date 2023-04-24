@@ -1,6 +1,8 @@
 module KeyCounter
 using Dates
 
+export Summary, add!, load, save, logkeys
+
 const DEBUG = true
 const SAVE_FILE = "summary.log"
 const SAVE_INTERVAL_MINS = 5
@@ -185,18 +187,20 @@ function logkeys()
         last_save = time()
         try
             while true
-                event = read(kbd, InputEvent)
-                if event.type == 1 && haskey(action, event.value)
-                    actiontype = action[event.value]
-                    if event.code ∈ MODIFIERS
-                        handle!(keys, modifiers, event.code, modifierkey, actiontype)
-                    end
-                    if event.code ∉ MODIFIERS || event.code ∈ STANDARD
-                        handle!(keys, modifiers, event.code, standardkey, actiontype)
+                if !eof(kbd)
+                    event = read(kbd, InputEvent)
+                    if event.type == 1 && haskey(action, event.value)
+                        actiontype = action[event.value]
+                        if event.code ∈ MODIFIERS
+                            handle!(keys, modifiers, event.code, modifierkey, actiontype)
+                        end
+                        if event.code ∉ MODIFIERS || event.code ∈ STANDARD
+                            handle!(keys, modifiers, event.code, standardkey, actiontype)
+                        end
                     end
                 end
                 if (time() - last_save) > SAVE_INTERVAL_MINS * 60
-                    @info "$(length(keys)) events recorded, saving to file."
+                    @info "$(sum(last, keys)) events recorded, saving to file."
                     save(SAVE_FILE, keys)
                     last_save = time()
                 end
