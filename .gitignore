@@ -26,3 +26,6 @@ Manifest.toml
 
 # VSCode files
 .vscode
+
+# Log files
+summary.log

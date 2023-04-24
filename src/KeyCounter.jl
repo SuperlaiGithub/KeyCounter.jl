@@ -7,6 +7,8 @@ const DEBUG = true
 const SAVE_FILE = "summary.log"
 const SAVE_INTERVAL_MINS = 5
 
+const TIME_FMT = dateformat"yyyy-mm-ddTHH:MM:SS"
+
 const MODIFIERS = Set{UInt16}([
     29,     # LEFTCTRL
     42,     # LEFTSHIFT
@@ -174,9 +176,11 @@ const action = Dict{UInt16, ActionType}(
 )
 
 function logkeys()
+    @info "Starting logger…"
     local keys
     try
         keys = load(SAVE_FILE, Summary)
+        @info "Loaded existing data"
     catch
         @warn "Couldn't read save file"
         keys = Summary()
@@ -200,12 +204,13 @@ function logkeys()
                     end
                 end
                 if (time() - last_save) > SAVE_INTERVAL_MINS * 60
-                    @info "$(sum(last, keys)) events recorded, saving to file."
+                    @info "[$(Dates.format(now(), TIME_FMT))] $(sum(last, keys)) events recorded, saving to file."
                     save(SAVE_FILE, keys)
                     last_save = time()
                 end
             end
-        finally
+        catch e
+            e isa InterruptException && @info "Saving and quitting"
             save(SAVE_FILE, keys)
         end
     end
