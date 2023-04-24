@@ -30,6 +30,7 @@ struct TimeVal
     seconds::UInt64
     microseconds::UInt64
 end
+TimeVal() = TimeVal(UInt64(0), UInt64(0))
 
 function Base.read(io::IO, ::Type{TimeVal})
     return TimeVal(
@@ -44,6 +45,7 @@ struct InputEvent
     code::UInt16
     value::UInt32
 end
+InputEvent() = InputEvent(TimeVal(), UInt16(0), UInt16(0), UInt32(0))
 
 function Base.read(io::IO, ::Type{InputEvent})
     return InputEvent(
@@ -198,16 +200,20 @@ function logkeys()
         last_save = time()
         try
             while true
-                if !eof(kbd)
+                event = InputEvent()
+                try
                     event = read(kbd, InputEvent)
-                    if event.type == 1 && haskey(action, event.value)
-                        actiontype = action[event.value]
-                        if event.code ∈ MODIFIERS
-                            handle!(keys, modifiers, event.code, modifierkey, actiontype)
-                        end
-                        if event.code ∉ MODIFIERS || event.code ∈ STANDARD
-                            handle!(keys, modifiers, event.code, standardkey, actiontype)
-                        end
+                catch e
+                    e isa EOFError || rethrow(e)
+                    @info "Received EOFError"
+                end
+                if event.type == 1 && haskey(action, event.value)
+                    actiontype = action[event.value]
+                    if event.code ∈ MODIFIERS
+                        handle!(keys, modifiers, event.code, modifierkey, actiontype)
+                    end
+                    if event.code ∉ MODIFIERS || event.code ∈ STANDARD
+                        handle!(keys, modifiers, event.code, standardkey, actiontype)
                     end
                 end
                 if (time() - last_save) > SAVE_INTERVAL_MINS * 60
