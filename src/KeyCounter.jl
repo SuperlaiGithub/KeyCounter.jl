@@ -1,6 +1,9 @@
 module KeyCounter
+using Dates
+
 const DEBUG = true
 const SAVE_FILE = "summary.log"
+const SAVE_INTERVAL_MINS = 5
 
 const MODIFIERS = Set{UInt16}([
     29,     # LEFTCTRL
@@ -85,6 +88,10 @@ end
 function Base.show(io::IO, ::MIME"text/plain", s::Summary)
     rows, cols = get(io, :displaysize, (25, 80))
 
+    num_lines = length(s)
+    ellipsis = num_lines > rows - 2
+    ellipsis && (num_lines = rows - 3)
+
     keys, counts = String[], String[]
     for (keycode, count) ∈ sort(collect(s), by=last, rev=true)
         keycodes = keycode isa Integer ? [keycode] : collect(keycode)
@@ -113,16 +120,28 @@ function Base.show(io::IO, s::Summary)
     print(io, join(items, ", "), ")\n")
 end
 
+function load(io::IO, ::Type{Summary})
+    s = Summary()
+    for line ∈ eachline(io)
+        keys_str, count_str = split(line, ": ")
+        keycodes_str = split(keys_str, ", ")
+        keycodes, count = parse.(Int, keycodes_str), parse(Int, count_str)
+        s[makekey(keycodes)] = count
+    end
+    return s
+end
+load(::Type{Summary}) = io -> load(io, Summary)
+load(filename::AbstractString, ::Type{Summary}) = open(load(Summary), filename)
+
 function save(io::IO, s::Summary)
     for (keycode, count) ∈ sort(collect(s), by=last, rev=true)
         keycodes = keycode isa Integer ? [keycode] : collect(keycode)
         sort!(keycodes)
         println(io, repr(keycodes)[2:end-1], ": ", count)
     end
-    println(io, "")
 end
 save(s::Summary) = io -> save(io, s)
-save(filename::AbstractString, s::Summary) = open(save(s), filename; append=true)
+save(filename::AbstractString, s::Summary) = open(save(s), filename; truncate=true)
 
 abstract type ActionType end
 struct KeyPress <: ActionType end
@@ -152,40 +171,40 @@ const action = Dict{UInt16, ActionType}(
     1 => keypress
 )
 
-function logkeys(comm)
-    keys = Summary()
+function logkeys()
+    local keys
+    try
+        keys = load(SAVE_FILE, Summary)
+    catch
+        @warn "Couldn't read save file"
+        keys = Summary()
+    end
     modifiers = Set{UInt16}()
+
     open("/dev/input/event6", "r") do kbd
-        while true
-            while eof(kbd)
-                sleep(0.1)
-            end
-            event = read(kbd, InputEvent)
-            if event.type == 1 && haskey(action, event.value)
-                if DEBUG
-                    println("Event")
-                    println("  Type:  $(event.type)")
-                    println("  Code:  $(event.code)")
-                    println("  Value: $(event.value)")
+        last_save = time()
+        try
+            while true
+                event = read(kbd, InputEvent)
+                if event.type == 1 && haskey(action, event.value)
+                    actiontype = action[event.value]
+                    if event.code ∈ MODIFIERS
+                        handle!(keys, modifiers, event.code, modifierkey, actiontype)
+                    end
+                    if event.code ∉ MODIFIERS || event.code ∈ STANDARD
+                        handle!(keys, modifiers, event.code, standardkey, actiontype)
+                    end
                 end
-                actiontype = action[event.value]
-                if event.code ∈ MODIFIERS
-                    handle!(keys, modifiers, event.code, modifierkey, actiontype)
-                end
-                if event.code ∉ MODIFIERS || event.code ∈ STANDARD
-                    handle!(keys, modifiers, event.code, standardkey, actiontype)
+                if (time() - last_save) > SAVE_INTERVAL_MINS * 60
+                    @info "$(length(keys)) events recorded, saving to file."
+                    save(SAVE_FILE, keys)
+                    last_save = time()
                 end
             end
-            while isready(comm)
-                command = fetch(comm)
-                command == 's' && save(SAVE_FILE, keys)
-                command == 'p' && show(stdout, MIME("text/plain"), keys)
-                take!(comm)
-                command == 'q' && return
-            end
+        finally
+            save(SAVE_FILE, keys)
         end
     end
-    return keys
 end
 
 function test()
@@ -230,4 +249,8 @@ function run()
 end
 
 end;
-isinteractive() || KeyCounter.run()
+
+if !isinteractive()
+    Base.exit_on_sigint(false)
+    KeyCounter.logkeys()
+end
