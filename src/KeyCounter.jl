@@ -227,47 +227,6 @@ function logkeys()
     end
 end
 
-function test()
-    open("/dev/input/event6", "r") do kbd
-        quit = false
-        while !quit
-            event = read(kbd, InputEvent)
-            if event.type == 1
-                println("Event")
-                println("  Type:  $(event.type)")
-                println("  Code:  $(event.code)")
-                println("  Value: $(event.value)")
-            end
-            quit = event.code == 1
-        end
-    end
-end
-
-function prompt()
-    print("Logging keys ")
-    printstyled(">>> "; color=:red)
-    printstyled("p"; color=:blue)
-    print("rint, ")
-    printstyled("s"; color=:blue)
-    print("ave, ")
-    printstyled("q"; color=:blue)
-    print("uit: ")
-    input = readline()
-    return isempty(input) ? ' ' : (input |> first |> lowercase)
-end
-
-function run()
-    comm = Channel{Char}(logkeys, 10; spawn=true)
-    input = ' '
-    while input ≠ 'q'
-        input = prompt()
-        put!(comm, input)
-        while !isempty(comm)
-            sleep(0.1)
-        end
-    end
-end
-
 end;
 
 if !isinteractive()
