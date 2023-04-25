@@ -23,22 +23,23 @@ end
 function test()
     open("/dev/input/event6", "r") do kbd
         @info "[$(Dates.format(now(), TIME_FMT))]"
-        @info "Monitoring keyboard events…"
+        @info "Monitoring input events…"
         try
             num_events = 1
             was_at_end = false
             while true
                 is_at_end = eof(kbd)
                 if !is_at_end
+                    mod(num_events, 100) == 0 && @info "$num_events received"
                     read(kbd, InputEvent)
                     num_events += 1
-                    mod(num_events, 100) == 0 && @info "Received $num_events keyboard events"
                 end
                 if is_at_end ≠ was_at_end
                     @info "[$(Dates.format(now(), TIME_FMT))]"
                     @info "Change in status, file is now " * (is_at_end ? "" : "not ") * "empty"
+                    @info "$num_events keyboard events received"
                 end
-                sleep(0.1)
+                sleep(0.01)
                 was_at_end = is_at_end
             end
         catch e

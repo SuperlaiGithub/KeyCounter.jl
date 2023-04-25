@@ -92,11 +92,11 @@ function makewidth(str, width)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", s::Summary)
-    rows, cols = get(io, :displaysize, (25, 80))
+    rows, cols = get(io, :displaysize, displaysize(io))
 
     num_lines = length(s)
-    ellipsis = num_lines > rows - 2
-    ellipsis && (num_lines = rows - 3)
+    ellipsis = num_lines > rows - 6
+    ellipsis && (num_lines = rows - 7)
 
     keys, counts = String[], String[]
     for (keycode, count) ∈ sort(collect(s), by=last, rev=true)
@@ -104,17 +104,15 @@ function Base.show(io::IO, ::MIME"text/plain", s::Summary)
         sort!(keycodes)
         push!(keys, join(keycodes, ", "))
         push!(counts, string(count))
-        length(keys) + 2 == rows && break
+        length(keys) == num_lines && break
     end
     keywidth, countwidth = width.([keys, counts], [8, 5])
     lines = makewidth.(keys, keywidth) .* " │ " .* lpad.(counts, countwidth)
 
     println(io, lpad("Keycode", keywidth), " │ ", lpad("Count", countwidth))
     println(io, "╶", "─"^keywidth, "┼─", "─"^countwidth, "╴")
-
-    #if length(s) + 2 ≤ rows
-    #
     println.(io, lines)
+    ellipsis && println(io, lpad("⋮", keywidth), " │ ", lpad("", countwidth))
 end
 
 keystring(key) = string(key isa Integer ? key : key |> collect |> sort)
