@@ -194,36 +194,34 @@ function logkeys()
     end
     modifiers = Set{UInt16}()
 
-    open("/dev/input/event6", "r") do kbd
-        last_save = time()
-        try
-            while true
-                event = InputEvent()
-                try
-                    event = read(kbd, InputEvent)
-                catch e
-                    e isa EOFError || rethrow(e)
-                    @info "Received EOFError"
+    kbd = open("/dev/input/event6", "r")
+    last_save = time()
+    try
+        while true
+            if eof(kbd)
+                close(kbd)
+                kbd = open("/dev/input/event6", "r")
+            end
+            event = read(kbd, InputEvent)
+            if event.type == 1 && haskey(action, event.value)
+                actiontype = action[event.value]
+                if event.code ∈ MODIFIERS
+                    handle!(keys, modifiers, event.code, modifierkey, actiontype)
                 end
-                if event.type == 1 && haskey(action, event.value)
-                    actiontype = action[event.value]
-                    if event.code ∈ MODIFIERS
-                        handle!(keys, modifiers, event.code, modifierkey, actiontype)
-                    end
-                    if event.code ∉ MODIFIERS || event.code ∈ STANDARD
-                        handle!(keys, modifiers, event.code, standardkey, actiontype)
-                    end
-                end
-                if (time() - last_save) > SAVE_INTERVAL_MINS * 60
-                    @info "[$(Dates.format(now(), TIME_FMT))] $(sum(last, keys)) events recorded, saving to file."
-                    save(SAVE_FILE, keys)
-                    last_save = time()
+                if event.code ∉ MODIFIERS || event.code ∈ STANDARD
+                    handle!(keys, modifiers, event.code, standardkey, actiontype)
                 end
             end
-        catch e
-            e isa InterruptException && @info "Saving and quitting"
-            save(SAVE_FILE, keys)
+            if (time() - last_save) > SAVE_INTERVAL_MINS * 60
+                @info "[$(Dates.format(now(), TIME_FMT))] $(sum(last, keys)) events recorded, saving to file."
+                save(SAVE_FILE, keys)
+                last_save = time()
+            end
         end
+    catch e
+        close(kbd)
+        e isa InterruptException && @info "Saving and quitting"
+        save(SAVE_FILE, keys)
     end
 end
 
