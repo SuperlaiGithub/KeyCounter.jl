@@ -3,9 +3,7 @@ using Dates
 
 export Summary, add!, load, save, logkeys
 
-const DEBUG = true
-const SAVE_FILE = "summary.log"
-const SAVE_INTERVAL_MINS = 5
+include("args.jl")
 
 const TIME_FMT = dateformat"yyyy-mm-ddTHH:MM:SS"
 
@@ -25,45 +23,6 @@ const MODIFIERS = Set{UInt16}([
 const STANDARD = Set{UInt16}([
     125, 126
 ])
-
-function get_devices()
-    devices = []
-    device = []
-    for line ∈ eachline("/proc/bus/input/devices")
-        if line == ""
-            push!(devices, device)
-            device = []
-        else
-            push!(device, line)
-        end
-    end
-    return devices
-end
-
-function score(device)
-    dev_str = device |> join |> lowercase
-    s = 0
-    contains(lowercase(dev_str), "keyboard") && (s += 100)
-    contains(dev_str, "kbd") && (s += 50)
-    contains(dev_str, "Sysfs=/devices/pci") && (s += 10)
-    return s
-end
-
-function device_number(device)
-    line = findfirst(startswith("H:"), device)
-    line ≡ nothing && throw(ErrorException("No handler for chosen device"))
-    m = match(r"event(\d+)", device[line])
-    m ≡ nothing && throw(ErrorException("No event handler for chosen device"))
-    num = tryparse(Int, m |> only)
-    num ≡ nothing && throw(ErrorException("No event number for chosen device"))
-    return num
-end
-
-function find_keyboard()
-    devices = get_devices()
-    dev_num = findmax(score, devices) |> last
-    return device_number(devices[dev_num])
-end
 
 struct TimeVal
     seconds::UInt64
@@ -225,7 +184,7 @@ function logkeys()
     @info "Starting logger…"
     local keys
     try
-        keys = load(SAVE_FILE, Summary)
+        keys = load(settings["output"], Summary)
         @info "Loaded existing data"
     catch
         @warn "Couldn't read save file"
@@ -233,13 +192,13 @@ function logkeys()
     end
     modifiers = Set{UInt16}()
 
-    kbd = open("/dev/input/event6", "r")
-    last_save = time()
+    kbd = open(settings["input"], "r")
+    last_save = now()
     try
         while true
             if eof(kbd)
                 close(kbd)
-                kbd = open("/dev/input/event6", "r")
+                kbd = open(settings["input"], "r")
             end
             event = read(kbd, InputEvent)
             if event.type == 1 && haskey(action, event.value)
@@ -251,16 +210,16 @@ function logkeys()
                     handle!(keys, modifiers, event.code, standardkey, actiontype)
                 end
             end
-            if (time() - last_save) > SAVE_INTERVAL_MINS * 60
+            if (now() - last_save) > settings["interval"]
                 @info "[$(Dates.format(now(), TIME_FMT))] $(sum(last, keys)) events recorded, saving to file."
-                save(SAVE_FILE, keys)
-                last_save = time()
+                save(settings["output"], keys)
+                last_save = now()
             end
         end
     catch e
         close(kbd)
         e isa InterruptException && @info "Saving and quitting"
-        save(SAVE_FILE, keys)
+        save(settings["output"], keys)
     end
 end
 

@@ -5,6 +5,7 @@
     - save interval
         - as ISO datetime period
     - verbosity level
+    - help
 * save only on changes
 * output file permissions / ownership
 * Julia native equivalent of `sudo` for file opening
