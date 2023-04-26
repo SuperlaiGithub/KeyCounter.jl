@@ -26,6 +26,45 @@ const STANDARD = Set{UInt16}([
     125, 126
 ])
 
+function get_devices()
+    devices = []
+    device = []
+    for line ∈ eachline("/proc/bus/input/devices")
+        if line == ""
+            push!(devices, device)
+            device = []
+        else
+            push!(device, line)
+        end
+    end
+    return devices
+end
+
+function score(device)
+    dev_str = device |> join |> lowercase
+    s = 0
+    contains(lowercase(dev_str), "keyboard") && (s += 100)
+    contains(dev_str, "kbd") && (s += 50)
+    contains(dev_str, "Sysfs=/devices/pci") && (s += 10)
+    return s
+end
+
+function device_number(device)
+    line = findfirst(startswith("H:"), device)
+    line ≡ nothing && throw(ErrorException("No handler for chosen device"))
+    m = match(r"event(\d+)", device[line])
+    m ≡ nothing && throw(ErrorException("No event handler for chosen device"))
+    num = tryparse(Int, m |> only)
+    num ≡ nothing && throw(ErrorException("No event number for chosen device"))
+    return num
+end
+
+function find_keyboard()
+    devices = get_devices()
+    dev_num = findmax(score, devices) |> last
+    return device_number(devices[dev_num])
+end
+
 struct TimeVal
     seconds::UInt64
     microseconds::UInt64
@@ -92,7 +131,7 @@ function makewidth(str, width)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", s::Summary)
-    rows, cols = get(io, :displaysize, displaysize(io))
+    rows = get(io, :displaysize, displaysize(io)) |> first
 
     num_lines = length(s)
     ellipsis = num_lines > rows - 6
