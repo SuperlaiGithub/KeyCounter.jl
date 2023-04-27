@@ -1,56 +1,56 @@
 <Esc>
-1 !
-2 @
-3 #
-4 $
-5 %
-6 ^
-7 &
-8 *
-9 (
-0 )
-[ {
-] }
+1 + |
+2 " @
+3 * #
+4 ç ¼
+5 % ½
+6 & ¬
+7 / |
+8 ( ¢
+9 ) ]
+0 = }
+' ? '
+^ ` ~
 <BckSp>
 <Tab>
-' "
-, <
-. >
-p P
-y Y
-f F
-g G
-c C
-r R
-l L
-/ ?
-= +
+q Q @
+w W ł
+e E €
+r R ¶
+t T ŧ
+z Z ←
+u U ↓
+i I →
+o O ø
+p P þ
+ü è [
+" ! ]
 <Enter>
-<LCtrl>
-a A
-o O
-e E
-u U
-i I
-d D
-h H
-t T
-n N
-s S
-- _
-` ~
+<Lctrl>
+a A æ
+s S ß
+d D ð
+f F đ
+g G ŋ
+h H ħ
+j J j
+k K ĸ
+l L ł
+ö é '
+ä à {
+§ ° ¬
 <LShft>
-\ |
-; :
-q Q
-j J
-k K
-x X
-b B
-m M
-w W
-v V
-z Z
+$ £ }
+y Y «
+x X »
+c C ¢
+v V “
+b B ”
+n N n
+m M µ
+, ;
+. : ·
+- _
 <RShft>
 <KP*>
 <LAlt>
@@ -81,7 +81,7 @@ z Z
 <KP3>
 <KP0>
 <KP.>
- 
+< > \
 <F11>
 <F12>
 <KPEnt>
