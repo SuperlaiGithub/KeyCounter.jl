@@ -180,6 +180,10 @@ const action = Dict{UInt16, ActionType}(
 )
 
 function countkeys()
+    if !isfile(settings["output"])
+        touch(settings["output"])
+        settings["user"] ≠ nothing && chown(settings["output"], settings["user"])
+    end
     local keys
     try
         keys = load(settings["output"], Summary)

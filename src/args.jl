@@ -79,6 +79,8 @@ function init_settings()
         "--debug", "-d"
             help = "enable debugging info"
             action = :store_true
+        "--user", "-u"
+            help = "user id for output file ownership, assigned automatically"
     end
     empty!(settings)
     merge!(settings, parse_args(ARGS, arg_settings))
