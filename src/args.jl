@@ -47,9 +47,9 @@ parse_int(n) = parse(Int, n)
 function parse_interval(str)
     m = match(interval_regex, str)
     m ≡ nothing && throw(ErrorException("invalid argument: interval should be [Nd][Nh][Nm][Ns]"))
-    return something.(m, fill("0", 4))  .|>
-        parse_int                       .|>
-        [Day, Hour, Minute, Second]      |>
+    return something.(m, "0")      .|>
+        parse_int                  .|>
+        [Day, Hour, Minute, Second] |>
         sum
 end
 
