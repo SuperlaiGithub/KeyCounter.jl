@@ -1,11 +1,10 @@
-module KeyCounter
+using ArgParse
 using Dates
-
-export Summary, add!, load, save, logkeys
 
 include("args.jl")
 
 const TIME_FMT = dateformat"yyyy-mm-ddTHH:MM:SS"
+timestamp() = "[$(Dates.format(now(), TIME_FMT))]"
 
 const MODIFIERS = Set{UInt16}([
     29,     # LEFTCTRL
@@ -180,8 +179,7 @@ const action = Dict{UInt16, ActionType}(
     1 => keypress
 )
 
-function logkeys()
-    @info "Starting logger…"
+function countkeys()
     local keys
     try
         keys = load(settings["output"], Summary)
@@ -192,11 +190,13 @@ function logkeys()
     end
     modifiers = Set{UInt16}()
 
+    @info "$(timestamp()) Starting counter…"
     kbd = open(settings["input"], "r")
     last_save = now()
     try
         while true
             if eof(kbd)
+                @warn "Event file closed, reopening"
                 close(kbd)
                 kbd = open(settings["input"], "r")
             end
@@ -211,7 +211,7 @@ function logkeys()
                 end
             end
             if (now() - last_save) > settings["interval"]
-                @info "[$(Dates.format(now(), TIME_FMT))] $(sum(last, keys)) events recorded, saving to file."
+                @info "$(timestamp()) $(sum(last, keys)) events recorded, saving to file."
                 save(settings["output"], keys)
                 last_save = now()
             end
@@ -223,9 +223,10 @@ function logkeys()
     end
 end
 
-end;
-
 if !isinteractive()
     Base.exit_on_sigint(false)
-    KeyCounter.logkeys()
+    @info "Processing command line arguments…"
+    init_settings()
+    countkeys()
 end
+
