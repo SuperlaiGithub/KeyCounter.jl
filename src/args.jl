@@ -1,5 +1,3 @@
-using ArgParse
-
 function get_devices()
     devices = []
     device = []
@@ -19,7 +17,7 @@ function score(device)
     s = 0
     contains(lowercase(dev_str), "keyboard") && (s += 100)
     contains(dev_str, "kbd") && (s += 50)
-    contains(dev_str, "Sysfs=/devices/pci") && (s += 10)
+    contains(dev_str, "sysfs=/devices/pci") && (s += 10)
     return s
 end
 
@@ -84,7 +82,7 @@ function init_settings()
     end
     empty!(settings)
     merge!(settings, parse_args(ARGS, arg_settings))
-    !haskey(settings, "event") && (settings["event"] = find_keyboard())
+    settings["event"] ≡ nothing && (settings["event"] = find_keyboard())
     settings["input"] = string(KEYBOARD_PATH, settings["event"])
     settings["interval"] = parse_interval(settings["interval"])
 end
