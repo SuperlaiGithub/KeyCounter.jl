@@ -56,20 +56,18 @@ end
 const KEYBOARD_PATH = "/dev/input/event"
 const DEF_SAVE_FILE = "summary.log"
 const DEF_SAVE_INTERVAL = "5m"
+const DEF_USER = 0 # ie root
 
-const settings = Dict{String, Any}(
-    "input"     => KEYBOARD_PATH * "0",
-    "output"    => DEF_SAVE_FILE,
-    "interval"  => parse_interval(DEF_SAVE_INTERVAL)
-)
-
-function init_settings()
+function settings_from_args()
     arg_settings = ArgParseSettings()
     @add_arg_table! arg_settings begin
         "--event", "-e"
             help = "event number of keyboard input, omit for auto detection"
             arg_type = Int
-        #"--keyboard", "-k"
+        "--keyboard", "-k" 
+            help = "name of keyboard device to search for (currently unused)"
+        "--input", "-I"
+            help = "full path to input file (ie /dev/input/event0). Overides --event"
         "--output", "-o"
             help = "file to write summary data to"
             default = DEF_SAVE_FILE
@@ -84,11 +82,16 @@ function init_settings()
             action = :store_true
         "--user", "-u"
             help = "user id for output file ownership, assigned automatically"
+            default = DEF_USER
     end
-    empty!(settings)
-    merge!(settings, parse_args(ARGS, arg_settings))
-    settings["event"] ≡ nothing && (settings["event"] = find_keyboard())
-    settings["input"] = string(KEYBOARD_PATH, settings["event"])
+    return parse_args(ARGS, arg_settings)
+end
+
+function init_settings!(settings)
+    if settings["input"] ≡ nothing
+        settings["event"] ≡ nothing && (settings["event"] = find_keyboard())
+        settings["input"] = string(KEYBOARD_PATH, settings["event"])
+    end
     settings["interval"] = parse_interval(settings["interval"])
 end
 

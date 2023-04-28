@@ -9,9 +9,9 @@ Once you have a working Julia installation use the following command
 sudo julia -e 'using Pkg; Pkg.add("KeyCounter"); using KeyCounter; install()'
 ```
 
-Since we require root privileges, alternatively use `sudo julia` and then
+Alternatively, start Julia as root using `sudo julia`. In the REPL press `]` to enter the package prompt and then use `add KeyCounter` to download the package. Once this is complete, press backspace to exit the package prompt and install the program using
 ```
-]add KeyCounter
+using KeyCounter
 install()
 ```
 
@@ -28,11 +28,11 @@ Alternatively, examine the text file `/proc/bus/input/devices` and look for a se
 First `sudo julia` and then
 ```julia
 using KeyCounter
-settings["input"] = "/dev/input/eventN"
 countkeys()
 ```
-
-Other possible settings (ie `settings["key"] = value`) are
+KeyCounter will attempt to auto detect the correct keyboard device. If this doesn't work you can supply the correct number, along with other settings as keyword arguments to `countkeys`. Acceptable keywords are detailed in the REPL help prompt (type `?countkeys`), which are summarised here.
+    * `event`: (Int) number of the event file to read from
+    * `input`: (String) event file to read from (ie /dev/input/event0). Overrides `event` setting
     * `output`: (String) filename to save results to
     * `interval`: (String) frequency to save results, in the format `[Nd][Nh][Nm][Ns]`
     * `quiet`: (Bool) whether to suppress output
@@ -57,8 +57,8 @@ Alternatively, `sudo julia` and then
 ```julia
 using KeyCounter
 uninstall()
-]remove KeyCounter
 ```
+Then enter the package prompt using `]` and use `remove KeyCounter` to remove this package.
 
 ## Credits & License
 
