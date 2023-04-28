@@ -1,7 +1,6 @@
 module KeyCounter
 using ArgParse
 using Dates
-using PackageCompiler
 
 export run, countkeys
 
