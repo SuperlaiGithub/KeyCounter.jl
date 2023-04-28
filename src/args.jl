@@ -53,12 +53,15 @@ function parse_interval(str)
         sum
 end
 
-const settings = Dict{String, Any}()
-
+const KEYBOARD_PATH = "/dev/input/event"
 const DEF_SAVE_FILE = "summary.log"
 const DEF_SAVE_INTERVAL = "5m"
 
-const KEYBOARD_PATH = "/dev/input/event"
+const settings = Dict{String, Any}(
+    "input"     => KEYBOARD_PATH * "0",
+    "output"    => DEF_SAVE_FILE,
+    "interval"  => parse_interval(DEF_SAVE_INTERVAL)
+)
 
 function init_settings()
     arg_settings = ArgParseSettings()
