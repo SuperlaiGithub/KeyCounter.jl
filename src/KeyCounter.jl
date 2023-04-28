@@ -8,7 +8,7 @@ include("settings.jl")
 include("datatypes.jl")
 include("logger.jl")
 
-function make_output()
+function make_output(settings)
     if !isfile(settings["output"])
         touch(settings["output"])
         settings["user"] ≠ nothing && chown(settings["output"], settings["user"])
@@ -30,7 +30,7 @@ end
 
 function logkeys(settings)
     init_settings!(settings)
-    make_output()
+    make_output(settings)
     keys = get_saved_data()
     _logkeys(settings, keys)
 end
