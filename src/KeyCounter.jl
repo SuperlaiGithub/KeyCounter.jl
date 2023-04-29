@@ -35,7 +35,10 @@ function logkeys(settings)
     _logkeys(settings, keys)
 end
 
-function countkeys(
+override!(settings, key, value) = settings[key] = something(value, Some(settings[key]))
+
+function countkeys(useARGS=!isinteractive();
+            keyboard    = nothing,
             event       = nothing,
             input       = nothing,
             output      = DEF_SAVE_FILE,
@@ -45,17 +48,12 @@ function countkeys(
             user        = DEF_USER
         )
 
-    logkeys(Dict{String, Any}(
-        "event"     => event,
-        "input"     => input,
-        "output"    => output,
-        "interval"  => interval,
-        "quiet"     => quiet,
-        "debug"     => debug,
-        "user"      => user
-    ))
+    settings = settings_from_args(useARGS ? ARGS : [])
+    for key ∈ ["keyboard", "event", "input", "output", "interval", "quiet", "debug", "user"]
+        key_sym = Symbol(key)
+        @eval override!(settings, $key, $key_sym)
+    end
+    logkeys(settings)
 end
-
-run() = logkeys(settings_from_args())
 
 end; #module

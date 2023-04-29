@@ -58,14 +58,14 @@ const DEF_SAVE_FILE = "summary.log"
 const DEF_SAVE_INTERVAL = "5m"
 const DEF_USER = 0 # ie root
 
-function settings_from_args()
+function settings_from_args(args)
     arg_settings = ArgParseSettings()
     @add_arg_table! arg_settings begin
+        "--keyboard", "-k" 
+            help = "name of keyboard device to search for (currently unused)"
         "--event", "-e"
             help = "event number of keyboard input, omit for auto detection"
             arg_type = Int
-        "--keyboard", "-k" 
-            help = "name of keyboard device to search for (currently unused)"
         "--input", "-I"
             help = "full path to input file (ie /dev/input/event0). Overides --event"
         "--output", "-o"
@@ -84,7 +84,7 @@ function settings_from_args()
             help = "user id for output file ownership, assigned automatically"
             default = DEF_USER
     end
-    return parse_args(ARGS, arg_settings)
+    return parse_args(args, arg_settings)
 end
 
 function init_settings!(settings)
