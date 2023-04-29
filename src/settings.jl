@@ -1,11 +1,11 @@
 function score(settings, device)
     s = 0
     for word ∈ something(settings["keyboard"] |> split, ["keyboard"])
-        word ∈ lowercase(device.name) && (s += 100)
+        occursin(lowercase(word), lowercase(device.name)) && (s += 100)
     end
     device.events & 0x120013 == 0x120013 && (s += 50)
-    "kbd" ∈ handlers && (s += 20)
-    "leds" ∈ handlers && device.leds & 7 == 7 && (s += 10)
+    "kbd" ∈ device.handlers && (s += 20)
+    "leds" ∈ device.handlers && device.leds & 7 == 7 && (s += 10)
     return s
 end
 score(settings) = device -> score(settings, device)
@@ -18,12 +18,15 @@ function device_number(settings, device)
     end
     isempty(nums) && throw(ErrorException("No event handler found for device"))
     length(nums) > 1 && @warn "Device has multiple event handlers"
-    return first(num)
+    return first(nums)
 end
 
 function find_keyboard(settings)
     devices = get_devices()
-    dev_num = findmax(score(settings), devices) |> last
+    scores = score(settings).(devices)
+    dev_score, dev_num = findmax(scores)
+    (length(filter(d -> dev_score - d ≤ 10, scores)) > 1 || dev_score ≤ 20) &&
+        @warn "Low confidence in autodetected keyboard"
     return device_number(settings, devices[dev_num])
 end
 

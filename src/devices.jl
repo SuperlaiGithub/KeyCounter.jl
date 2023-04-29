@@ -21,7 +21,7 @@ function Device(lines::Vector{String})
     return device
 end
 
-parse_id(str) = split(str) |> (eqs -> split.(eqs, "=")) |> (kvs -> Pair.(kvs)) |> Dict
+parse_id(str) = split(str) |> (eqs -> split.(eqs, "=")) |>  Dict
 parse_string(str) = strip(str, '"')
 parse_bitmap(str) = parse(UInt64, str, base=16)
 parse_handlers(str) = split(str)
@@ -81,8 +81,8 @@ function handle!(line, device)
 end
 
 function get_devices()
-    devices = []
-    device = []
+    devices = Vector{String}[]
+    device = String[]
     for line ∈ eachline("/proc/bus/input/devices")
         if line == ""
             push!(devices, device)
