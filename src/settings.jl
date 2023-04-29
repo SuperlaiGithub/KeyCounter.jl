@@ -82,7 +82,7 @@ end
 
 function init_settings!(settings)
     if settings["input"] ≡ nothing
-        settings["event"] ≡ nothing && (settings["event"] = find_keyboard())
+        settings["event"] ≡ nothing && (settings["event"] = find_keyboard(settings))
         settings["input"] = string(KEYBOARD_PATH, settings["event"])
     end
     settings["interval"] = parse_interval(settings["interval"])

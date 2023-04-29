@@ -1,5 +1,4 @@
 * command line arguments
-    - device name?
     - verbosity level
 * check it works as stand-alone process
 * keymaps

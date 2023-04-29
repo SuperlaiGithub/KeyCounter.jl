@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo julia -q -e 'using KeyCounter; run()' -- --user `id -u` "$@"
+sudo julia -q -e 'using KeyCounter; countkeys()' -- --user `id -u` "$@"

@@ -2,7 +2,7 @@ module KeyCounter
 using ArgParse
 using Dates
 
-export run, countkeys
+export countkeys
 
 include("devices.jl")
 include("settings.jl")
@@ -17,16 +17,14 @@ function make_output(settings)
 end
 
 function get_saved_data()
-    # TODO fix this
-    local keys
     try
         keys = load(settings["output"], Summary)
         @info "Loaded existing data"
+        return keys
     catch
         @warn "Couldn't read save file"
-        keys = Summary()
+        return Summary()
     end
-    return keys
 end
 
 function logkeys(settings)
