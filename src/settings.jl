@@ -1,40 +1,30 @@
-function get_devices()
-    devices = []
-    device = []
-    for line ∈ eachline("/proc/bus/input/devices")
-        if line == ""
-            push!(devices, device)
-            device = []
-        else
-            push!(device, line)
-        end
-    end
-    return devices
-end
-
-function score(device)
-    dev_str = device |> join |> lowercase
+function score(settings, device)
     s = 0
-    contains(lowercase(dev_str), "keyboard") && (s += 100)
-    contains(dev_str, "kbd") && (s += 50)
-    contains(dev_str, "sysfs=/devices/pci") && (s += 10)
+    for word ∈ something(settings["keyboard"] |> split, ["keyboard"])
+        word ∈ lowercase(device.name) && (s += 100)
+    end
+    device.events & 0x120013 == 0x120013 && (s += 50)
+    "kbd" ∈ handlers && (s += 20)
+    "leds" ∈ handlers && device.leds & 7 == 7 && (s += 10)
     return s
 end
+score(settings) = device -> score(settings, device)
 
-function device_number(device)
-    line = findfirst(startswith("H:"), device)
-    line ≡ nothing && throw(ErrorException("No handler for chosen device"))
-    m = match(r"event(\d+)", device[line])
-    m ≡ nothing && throw(ErrorException("No event handler for chosen device"))
-    num = tryparse(Int, m |> only)
-    num ≡ nothing && throw(ErrorException("No event number for chosen device"))
-    return num
+function device_number(settings, device)
+    nums = []
+    for handler ∈ device.handlers
+        m = match(r"event(\d+)", handler)
+        m ≠ nothing && push!(nums, only(m))
+    end
+    isempty(nums) && throw(ErrorException("No event handler found for device"))
+    length(nums) > 1 && @warn "Device has multiple event handlers"
+    return first(num)
 end
 
-function find_keyboard()
+function find_keyboard(settings)
     devices = get_devices()
-    dev_num = findmax(score, devices) |> last
-    return device_number(devices[dev_num])
+    dev_num = findmax(score(settings), devices) |> last
+    return device_number(settings, devices[dev_num])
 end
 
 const interval_regex = Regex(
@@ -62,7 +52,7 @@ function settings_from_args(args)
     arg_settings = ArgParseSettings()
     @add_arg_table! arg_settings begin
         "--keyboard", "-k" 
-            help = "name of keyboard device to search for (currently unused)"
+            help = "name of keyboard device to search for. Keywords like make and model works best (ie \"logitech g512\")"
         "--event", "-e"
             help = "event number of keyboard input, omit for auto detection"
             arg_type = Int

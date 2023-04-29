@@ -4,6 +4,7 @@ using Dates
 
 export run, countkeys
 
+include("devices.jl")
 include("settings.jl")
 include("datatypes.jl")
 include("logger.jl")
