@@ -29,4 +29,5 @@ Manifest.toml
 
 # Log files
 *.log
+*.log.bak
 
