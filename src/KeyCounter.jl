@@ -41,7 +41,7 @@ override!(settings, key, value) = settings[key] = something(value, Some(settings
 function set_log_level(settings)
     log_level = Logging.Info
     settings["quiet"] && (log_level = Logging.Warn)
-    settings["debug"] && (log_level = Logging.LogLevel(-2000))
+    settings["debug"] && (log_level = Logging.Debug)
     Logging.global_logger(ConsoleLogger(log_level))
 end
 
