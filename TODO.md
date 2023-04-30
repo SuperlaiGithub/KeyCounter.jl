@@ -3,3 +3,4 @@
     - translate from codes to keys
 * installation script / instructions
     - improve README
+* backup log upon opening
