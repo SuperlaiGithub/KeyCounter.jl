@@ -1,6 +1,6 @@
 function score(settings, device)
     s = 0
-    for word ∈ something(settings["keyboard"] |> split, ["keyboard"])
+    for word ∈ something(settings["keyboard"], "keyboard") |> split
         occursin(lowercase(word), lowercase(device.name)) && (s += 100)
     end
     device.events & 0x120013 == 0x120013 && (s += 50)
@@ -83,11 +83,6 @@ function settings_from_args(args)
 end
 
 function init_settings!(settings)
-    log_level = Logging.Debug
-    settings["quiet"] && (log_level = Logging.Warn)
-    settings["debug"] && (log_level = Logging.LogLevel(-2000))
-    Logging.disable_logging(log_level)
-
     if settings["input"] ≡ nothing
         settings["event"] ≡ nothing && (settings["event"] = find_keyboard(settings))
         settings["input"] = string(KEYBOARD_PATH, settings["event"])

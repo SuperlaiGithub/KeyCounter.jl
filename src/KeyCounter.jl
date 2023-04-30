@@ -18,13 +18,13 @@ function make_output(settings)
     end
 end
 
-function get_saved_data()
+function get_saved_data(settings)
     try
         keys = load(settings["output"], Summary)
         @info "Loaded existing data"
         return keys
-    catch
-        @warn "Couldn't read save file"
+    catch exception
+        @warn "Couldn't read save file" exception
         return Summary()
     end
 end
@@ -32,11 +32,18 @@ end
 function logkeys(settings)
     init_settings!(settings)
     make_output(settings)
-    keys = get_saved_data()
+    keys = get_saved_data(settings)
     _logkeys(settings, keys)
 end
 
 override!(settings, key, value) = settings[key] = something(value, Some(settings[key]))
+
+function set_log_level(settings)
+    log_level = Logging.Debug
+    settings["quiet"] && (log_level = Logging.Warn)
+    settings["debug"] && (log_level = Logging.LogLevel(-2000))
+    Logging.global_logger(ConsoleLogger(log_level))
+end
 
 function countkeys(useARGS=!isinteractive();
             keyboard    = nothing,
@@ -49,13 +56,30 @@ function countkeys(useARGS=!isinteractive();
             user        = DEF_USER
         )
 
+    # we need to provide output before fully processing all commandline/keyword arguments
+    settings = Dict(
+        "quiet" => quiet,
+        "debug" => debug
+    )
+    if useARGS
+        ("--quiet" ∈ ARGS || "-q" ∈ ARGS) && (settings["quiet"] = true)
+        ("--debug" ∈ ARGS || "-d" ∈ ARGS) && (settings["debug"] = true)
+    end
+    set_log_level(settings)
+
     @debug "Determining settings from $(useARGS ? "command line" : "keyword") arguments"
     settings = settings_from_args(useARGS ? ARGS : [])
     useARGS && @debug "Arguments received from command line are $settings"
-    for key ∈ ["keyboard", "event", "input", "output", "interval", "quiet", "debug", "user"]
-        key_sym = Symbol(key)
-        @eval override!(settings, $key, $key_sym)
-    end
+
+    override!(settings, "keyboard", keyboard)
+    override!(settings, "event",    event)
+    override!(settings, "input",    input)
+    override!(settings, "output",   output)
+    override!(settings, "interval", interval)
+    override!(settings, "quiet",    quiet)
+    override!(settings, "debug",    debug)
+    override!(settings, "user",     user)
+
     @debug "Final settings are $settings"
     logkeys(settings)
 end
