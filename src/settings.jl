@@ -6,6 +6,7 @@ function score(settings, device)
     device.events & 0x120013 == 0x120013 && (s += 50)
     "kbd" ∈ device.handlers && (s += 20)
     "leds" ∈ device.handlers && device.leds & 7 == 7 && (s += 10)
+    @debug "Device $(device.name) scored $s"
     return s
 end
 score(settings) = device -> score(settings, device)
@@ -25,6 +26,7 @@ function find_keyboard(settings)
     devices = get_devices()
     scores = score(settings).(devices)
     dev_score, dev_num = findmax(scores)
+    @debug "Most likely keyboard device is $dev_num" devices[dev_num]
     (length(filter(d -> dev_score - d ≤ 10, scores)) > 1 || dev_score ≤ 20) &&
         @warn "Low confidence in autodetected keyboard"
     return device_number(settings, devices[dev_num])
@@ -71,7 +73,7 @@ function settings_from_args(args)
             help = "suppress all standard output"
             action = :store_true
         "--debug", "-d"
-            help = "enable debugging info"
+            help = "enable debugging info (overrides --quiet)"
             action = :store_true
         "--user", "-u"
             help = "user id for output file ownership, assigned automatically"
@@ -81,10 +83,17 @@ function settings_from_args(args)
 end
 
 function init_settings!(settings)
+    log_level = Logging.Debug
+    settings["quiet"] && (log_level = Logging.Warn)
+    settings["debug"] && (log_level = Logging.LogLevel(-2000))
+    Logging.disable_logging(log_level)
+
     if settings["input"] ≡ nothing
         settings["event"] ≡ nothing && (settings["event"] = find_keyboard(settings))
         settings["input"] = string(KEYBOARD_PATH, settings["event"])
+        @debug "No input file provided, using $(settings["input"])"
     end
     settings["interval"] = parse_interval(settings["interval"])
+    @debug "Autosave every $(settings["interval"])"
 end
 

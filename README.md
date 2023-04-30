@@ -37,7 +37,7 @@ KeyCounter will attempt to auto detect the correct keyboard device. If this does
     * `output`: (String) filename to save results to
     * `interval`: (String) frequency to save results, in the format `[Nd][Nh][Nm][Ns]`
     * `quiet`: (Bool) whether to suppress output
-    * `debug`: (Bool) whether to display debugging information
+    * `debug`: (Bool) whether to display debugging information (overrides `quiet`)
     * `user`: (Int) user id for ownership of the output file (as we are running as root)
 
 ## Commandline Usage

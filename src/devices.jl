@@ -91,6 +91,7 @@ function get_devices()
             push!(device, line)
         end
     end
+    @debug "Found $(length(devices)) input devices"
     return Device.(devices)
 end
 
