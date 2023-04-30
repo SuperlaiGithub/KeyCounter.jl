@@ -51,7 +51,7 @@ keycounter []
 
 From the command line use
 ```bash
-keycounter-uninstall
+keycounter --uninstall
 ```
 
 Alternatively, `sudo julia` and then

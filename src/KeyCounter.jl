@@ -3,12 +3,13 @@ using ArgParse
 using Dates
 using Logging
 
-export countkeys
+export countkeys, install, uninstall
 
 include("devices.jl")
 include("settings.jl")
 include("datatypes.jl")
 include("logger.jl")
+include("install.jl")
 
 function make_output(settings)
     if !isfile(settings["output"])
