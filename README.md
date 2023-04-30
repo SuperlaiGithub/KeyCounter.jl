@@ -10,7 +10,7 @@ sudo julia -e 'using Pkg; Pkg.add("KeyCounter"); using KeyCounter; install()'
 ```
 
 Alternatively, start Julia as root using `sudo julia`. In the REPL press `]` to enter the package prompt and then use `add KeyCounter` to download the package. Once this is complete, press backspace to exit the package prompt and install the program using
-```
+```julia-repl
 using KeyCounter
 install()
 ```
@@ -26,7 +26,7 @@ Alternatively, examine the text file `/proc/bus/input/devices` and look for a se
 ## Julia Usage
 
 First `sudo julia` and then
-```julia
+```julia-repl
 using KeyCounter
 countkeys()
 ```
@@ -55,7 +55,7 @@ keycounter --uninstall
 ```
 
 Alternatively, `sudo julia` and then
-```julia
+```julia-repl
 using KeyCounter
 uninstall()
 ```
