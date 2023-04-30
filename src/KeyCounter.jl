@@ -56,7 +56,7 @@ function countkeys(useARGS=!isinteractive();
             user        = DEF_USER
         )
 
-    # we need to provide output before fully processing all commandline/keyword arguments
+    # we may need to provide output before fully processing all commandline/keyword arguments
     settings = Dict(
         "quiet" => quiet,
         "debug" => debug
