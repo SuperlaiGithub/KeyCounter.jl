@@ -54,7 +54,11 @@ const DEF_SAVE_INTERVAL = "5m"
 const DEF_USER = 0 # ie root
 
 function settings_from_args(args)
-    arg_settings = ArgParseSettings()
+    arg_settings = ArgParseSettings(
+        prog        = "keycounter",
+        description = "Count keys pressed and save a summary to a log file.",
+        version     = string(VER)
+    )
     @add_arg_table! arg_settings begin
         "--keyboard", "-k" 
             help = "name of keyboard device to search for. Keywords like make and model works best (ie \"logitech g512\")"

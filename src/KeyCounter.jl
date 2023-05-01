@@ -1,4 +1,6 @@
 module KeyCounter
+const VER = v"1.0.0"
+
 using ArgParse
 using Dates
 using Logging
