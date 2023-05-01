@@ -6,10 +6,12 @@
 * backup log upon opening
 * change to `keycounter cmd [options]` style usage
     - `start`
-    - `stop`
-    - `save`
     - `install`
+        - allow unattended and/or quiet installation
+        - guided configuration during install including interactive eventN detection
     - `uninstall`
-    - `map`?
-
-    
+    - `translate`
+        - convert summary to key names (.md format?)
+    - `config`
+* implement configuration file
+    - auto config and allow during installation
