@@ -8,8 +8,8 @@ const SCRIPT_FILE_PATH = "../scripts"
 const SCRIPT_PATH = "/usr/local/bin"
 
 function install()
-    src = joinpath(@__FILE__, SCRIPT_FILE_PATH, SCRIPT_FILENAME)
-    dest = joinpath(SCRIPT_PATH, SCRIPT_FILENAME)
+    src = normpath(@__FILE__, SCRIPT_FILE_PATH, SCRIPT_FILENAME)
+    dest = normpath(SCRIPT_PATH, SCRIPT_FILENAME)
     try
         cp(src, dest)
     catch e
@@ -31,8 +31,8 @@ function install()
 end
 
 function uninstall()
-    src = joinpath(@__FILE__, SCRIPT_FILE_PATH, SCRIPT_FILENAME)
-    dest = joinpath(SCRIPT_PATH, SCRIPT_FILENAME)
+    src = normpath(@__FILE__, SCRIPT_FILE_PATH, SCRIPT_FILENAME)
+    dest = normpath(SCRIPT_PATH, SCRIPT_FILENAME)
     try
         if !file_compare(src, dest)
             @error "Cannot uninstall, $dest was not installed by this program"
