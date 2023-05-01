@@ -81,7 +81,7 @@ function settings_from_args(args)
             action = :store_true
         "--user", "-u"
             help = "user id for output file ownership, assigned automatically"
-            arg_tye = Int
+            arg_type = Int
             default = DEF_USER
         "--uninstall"
             help = "uninstall the program (must be first and only option otherwise will be ignored)"
