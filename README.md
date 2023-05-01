@@ -17,13 +17,17 @@ install()
 
 ## Event Number
 
-KeyCounter needs to read keyboard events from a file in `/dev/input`. However, there are several files numbered `event0`, `event1`, etc and which corresponds to your keyboard is somewhat random. KeyCounter will attempt to autodetect the correct one, but this is likely to not succeed.
+KeyCounter needs to read keyboard events from a file in `/dev/input`. However, there are several files numbered `event0`, `event1`, etc and which corresponds to your keyboard is somewhat random. KeyCounter will attempt to autodetect the correct one, but this is likely to not succeed by itself.
 
-To determine the correct number, either `sudo hexdump /dev/input/eventN` each N in turn and type some keys and see if there is any data produced.
+Depending on how strange your setup or keyboard is, you should be able to auto detect your keyboard by supplying the `keyboard` parameter with the make and model of your keyboard (ie "Razer Blackwidow").
 
-Alternatively, examine the text file `/proc/bus/input/devices` and look for a section with the correct `N: [Name]` line and a corresponding `H: ... kbd eventN` line.
+If KeyCounter can't determine the keyboard number correctly then you may be able to determine the correct event number by examining the text file `/proc/bus/input/devices`. Within this file look for a section with the correct `N: [Name]` line and a corresponding `H: ... kbd eventN` line.
 
-## Julia Usage
+Alternatively, use `sudo hexdump /dev/input/eventN` for each N in turn and type some keys and see if there is any data produced. For the correct N you should receive data whenever a key is pressed or released.
+
+The correct value of N can then be passed to KeyCounter with the `event` parameter.
+
+## Julia Usage 2160323
 
 First `sudo julia` and then
 ```julia-repl
@@ -41,6 +45,8 @@ KeyCounter will attempt to auto detect the correct keyboard device. If this does
     * debug: (Bool) whether to display debugging information (overrides `quiet`)
     * user: (Int) user id for ownership of the output file (as we are running as root)
 
+To stop counting keys, simply type <CTRL>+C (^C) or, if running in the background, send SIGINT to the process. Keys counted will be saved to the output file before exiting.
+
 ## Commandline Usage
 
 From the command line use
@@ -51,6 +57,7 @@ This will use default settings and attempt to auto detect your keyboard. For lis
 ```
 keycounter --help
 ```
+To stop counting keys, simply type <CTRL>+C (^C) or, if running in the background, send SIGINT to the process. Keys counted will be saved to the output file before exiting.
 
 ## Uninstallation
 
