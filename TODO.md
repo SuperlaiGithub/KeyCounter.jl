@@ -11,6 +11,7 @@ Pre 1.0
 Post 1.0
 ========
 
+* add docstrings
 * keymaps
     - translate from codes to keys
 * backup log upon saving
