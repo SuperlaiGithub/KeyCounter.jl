@@ -10,6 +10,7 @@ const SCRIPT_PATH = "/usr/local/bin"
 function install()
     src = normpath(@__FILE__, SCRIPT_FILE_PATH, SCRIPT_FILENAME)
     dest = normpath(SCRIPT_PATH, SCRIPT_FILENAME)
+    @info "Current dir is $(@__FILE__)"
     @info "Attempting to copy from $src to $dest…"
     try
         cp(src, dest)
