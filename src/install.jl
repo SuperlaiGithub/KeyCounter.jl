@@ -3,7 +3,7 @@ function file_compare(file1, file2)
     return read(file1, String) == read(file2, String)
 end
 
-const SCRIPT_FILENAME = "keycounter.sh"
+const SCRIPT_FILENAME = "keycounter"
 const SCRIPT_FILE_PATH = "../scripts"
 const SCRIPT_PATH = "/usr/local/bin"
 

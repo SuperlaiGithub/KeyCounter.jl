@@ -78,6 +78,8 @@ function settings_from_args(args)
         "--user", "-u"
             help = "user id for output file ownership, assigned automatically"
             default = DEF_USER
+        "--uninstall"
+            help = "uninstall the program (must be first and only option)"
     end
     return parse_args(args, arg_settings)
 end
