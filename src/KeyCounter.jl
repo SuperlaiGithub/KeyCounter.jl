@@ -52,11 +52,11 @@ function countkeys(useARGS=!isinteractive();
             keyboard    = nothing,
             event       = nothing,
             input       = nothing,
-            output      = DEF_SAVE_FILE,
-            interval    = DEF_SAVE_INTERVAL,
-            quiet       = false,
-            debug       = false,
-            user        = DEF_USER
+            output      = nothing,
+            interval    = nothing,
+            quiet       = nothing,
+            debug       = nothing,
+            user        = nothing
         )
 
     # we may need to provide output before fully processing all commandline/keyword arguments
