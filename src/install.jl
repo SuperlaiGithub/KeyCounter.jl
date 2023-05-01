@@ -20,7 +20,11 @@ function install()
         end
         e isa ArgumentError || rethrow(e)
         # e isa ArgumentError means that destination already exists
-        file_compare(src, dest) || @error "Installation failed, a different file already exists at $dest"
+        if file_compare(src, dest)
+            @info "Script file already installed"
+        else
+            @error "Installation failed, a different file already exists at $dest"
+        end
         return
     end
     @info "Installation successful"
