@@ -31,3 +31,5 @@ Manifest.toml
 *.log
 *.log.bak
 
+# Test files
+test
