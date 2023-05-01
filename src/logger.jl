@@ -40,6 +40,7 @@ function _logkeys(settings, keys)
     @info "$(timestamp()) Starting counter…"
     kbd = open(settings["input"], "r")
     last_save = now()
+    Base.exit_on_sigint(false)
     try
         while true
             if eof(kbd)
