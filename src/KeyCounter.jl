@@ -60,7 +60,7 @@ function countkeys(useARGS=!isinteractive();
         )
 
     # we may need to provide output before fully processing all commandline/keyword arguments
-    settings = Dict(
+    settings = Dict{String, Any}(
         "quiet" => quiet,
         "debug" => debug
     )
