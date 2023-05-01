@@ -32,20 +32,24 @@ countkeys()
 ```
 KeyCounter will attempt to auto detect the correct keyboard device. If this doesn't work you can supply the correct number, along with other settings as keyword arguments to `countkeys`. Acceptable keywords are detailed in the REPL help prompt (type `?countkeys`), which are summarised here.
 
-    * `keyboard`: (String) name of the keyboard to assist with autodetecting. Using just keywords like the make and model works best (ie "logitech g512")
-    * `event`: (Int) number of the event file to read from
-    * `input`: (String) event file to read from (ie /dev/input/event0). Overrides `event` setting
-    * `output`: (String) filename to save results to
-    * `interval`: (String) frequency to save results, in the format `[Nd][Nh][Nm][Ns]`
-    * `quiet`: (Bool) whether to suppress output
-    * `debug`: (Bool) whether to display debugging information (overrides `quiet`)
-    * `user`: (Int) user id for ownership of the output file (as we are running as root)
+    * keyboard: (String) name of the keyboard to assist with autodetecting. Using just keywords like the make and model works best (ie "logitech g512")
+    * event: (Int) number of the event file to read from
+    * input: (String) event file to read from (ie /dev/input/event0). Overrides `event` setting
+    * output: (String) filename to save results to
+    * interval: (String) frequency to save results, in the format `[Nd][Nh][Nm][Ns]`
+    * quiet: (Bool) whether to suppress output
+    * debug: (Bool) whether to display debugging information (overrides `quiet`)
+    * user: (Int) user id for ownership of the output file (as we are running as root)
 
 ## Commandline Usage
 
 From the command line use
-```bash
-keycounter []
+```
+keycounter
+```
+This will use default settings and attempt to auto detect your keyboard. For list of available options use
+```
+keycounter --help
 ```
 
 ## Uninstallation
