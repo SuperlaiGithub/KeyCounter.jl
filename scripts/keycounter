@@ -1,7 +1,7 @@
 #!/bin/sh
 if [ $1 = "--uninstall" ]
 then
-	sudo julia -q -e 'using KeyCounter; uninstall(); using Pkg; Pkg.remove("KeyCounter")'
+	sudo julia -q -e 'using KeyCounter; uninstall(); using Pkg; Pkg.rm("KeyCounter")'
 else
 	sudo julia -q -e 'using KeyCounter; countkeys()' -- --user `id -u` "$@"
 fi
