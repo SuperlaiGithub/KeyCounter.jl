@@ -73,7 +73,7 @@ function countkeys(useARGS=!isinteractive();
     @debug "Determining settings from $(useARGS ? "command line" : "keyword") arguments"
     settings = settings_from_args(useARGS ? ARGS : [])
     useARGS && @debug "Arguments received from command line are $settings"
-
+    flush(stdout)
     override!(settings, "keyboard", keyboard)
     override!(settings, "event",    event)
     override!(settings, "input",    input)
