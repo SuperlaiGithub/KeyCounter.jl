@@ -27,7 +27,7 @@ Alternatively, use `sudo hexdump /dev/input/eventN` for each N in turn and type 
 
 The correct value of N can then be passed to KeyCounter with the `event` parameter.
 
-## Julia Usage 2160323
+## Julia Usage
 
 First `sudo julia` and then
 ```julia-repl
