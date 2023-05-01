@@ -13,7 +13,7 @@ function install()
     try
         cp(src, dest)
     catch e
-        if e isa IOError
+        if e isa Base.IOError
             e.code == -2 && @error "Installation failed, missing script file"
             e.code == -13 && @error "Installation failed, retry with root permissions"
             return
@@ -39,7 +39,7 @@ function uninstall()
         end
         rm(dest)
     catch e
-        if e isa IOError
+        if e isa Base.IOError
             e.code == -2 && @warn "File missing, perhaps already uninstalled?"
             e.code == -13 && @error "Cannot uninstall, retry with root permissions"
             return
