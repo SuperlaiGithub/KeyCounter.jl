@@ -45,7 +45,7 @@ KeyCounter will attempt to auto detect the correct keyboard device. If this does
     * debug: (Bool) whether to display debugging information (overrides `quiet`)
     * user: (Int) user id for ownership of the output file (as we are running as root)
 
-To stop counting keys, simply type `<CTRL>>+C` (`^C`) or, if running in the background, send SIGINT to the process. Keys counted will be saved to the output file before exiting.
+To stop counting keys, simply type `<CTRL>+C` (`^C`) or, if running in the background, send SIGINT to the process. Keys counted will be saved to the output file before exiting.
 
 ## Commandline Usage
 
