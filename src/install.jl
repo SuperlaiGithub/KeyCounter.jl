@@ -38,6 +38,7 @@ function uninstall()
     try
         if !file_compare(src, dest)
             @error "Cannot uninstall, $dest was not installed by this program"
+            return
         end
         rm(dest)
     catch e
