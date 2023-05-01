@@ -43,8 +43,8 @@ override!(settings, key, value) = settings[key] = something(value, Some(settings
 
 function set_log_level(settings)
     log_level = Logging.Info
-    settings["quiet"] && (log_level = Logging.Warn)
-    settings["debug"] && (log_level = Logging.Debug)
+    settings["quiet"] ≠ nothing && settings["quiet"] && (log_level = Logging.Warn)
+    settings["debug"] ≠ nothing && settings["debug"] && (log_level = Logging.Debug)
     Logging.global_logger(ConsoleLogger(log_level))
 end
 
@@ -73,7 +73,7 @@ function countkeys(useARGS=!isinteractive();
     @debug "Determining settings from $(useARGS ? "command line" : "keyword") arguments"
     settings = settings_from_args(useARGS ? ARGS : [])
     useARGS && @debug "Arguments received from command line are $settings"
-    return
+
     override!(settings, "keyboard", keyboard)
     override!(settings, "event",    event)
     override!(settings, "input",    input)
