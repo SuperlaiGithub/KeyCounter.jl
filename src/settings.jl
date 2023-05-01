@@ -71,7 +71,7 @@ function settings_from_args(args)
             help = "file to write summary data to"
             default = DEF_SAVE_FILE
         "--interval", "-i"
-            help = "save interval"
+            help = "save interval in the format [Nd][Nh][Nm][Ns]"
             default = DEF_SAVE_INTERVAL
         "--quiet", "-q"
             help = "suppress all standard output"
