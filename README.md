@@ -2,6 +2,10 @@
 
 Utility to count keys presses on a Linux system. Useful for determining the frequency with which particular keys and key combinations are used when developing a keyboard layout.
 
+### Note
+
+This project is hosted on [Codeberg](https://codeberg.org/screw_dog/KeyCounter.jl) and reluctantly mirrored on [GitHub](https://github.com/screwdog/KeyCounter.jl). Unfortunately, to be included in the Julia general repository it is (currently) necessary to be hosted on GitHub, but I encourage all who can to [give up GitHub](https://GiveUpGitHub.org).
+
 ## Installation
 
 Once you have a working Julia installation use the following command
@@ -34,7 +38,7 @@ First `sudo julia` and then
 using KeyCounter
 countkeys()
 ```
-KeyCounter will attempt to auto detect the correct keyboard device. If this doesn't work you can supply the make and model of the keyboard or the correct event number, along with other settings, as keyword arguments to `countkeys`. Acceptable keywords are detailed in the REPL help prompt (type `?countkeys`), which are summarised here.
+KeyCounter will attempt to auto detect the correct keyboard device. If this doesn't work you can supply the make and model of the keyboard or the correct event number, along with other settings, as keyword arguments to `countkeys`. Accepted keywords are:
 
     * keyboard: (String) name of the keyboard to assist with autodetecting. Using just keywords like the make and model works best (ie "logitech g512")
     * event: (Int) number of the event file to read from
