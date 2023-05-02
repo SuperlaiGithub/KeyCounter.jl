@@ -1,9 +1,13 @@
 name = "KeyCounter"
 uuid = "f308447f-e99f-46ec-ad9e-5a4c598148f8"
 authors = ["screwdog <ray.harry@gmail.com>"]
-version = "0.1.0"
+version = "1.0.0"
 
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+
+[compat]
+julia = "1.8.5"
+ArgParse = "1.1.4"
